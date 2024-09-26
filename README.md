@@ -10,6 +10,7 @@ This repository contains a guided walkthrough of the data analysis and pipeline 
 
 #### Note
 Many script parameters need customization per user. Future script updates will allow passing an overarching prefix argument, but for now, users must manually edit script prefixes, output paths, and filenames.
+Additionally, submission code is supplied for all scripts with descriptive placeholder arguments in the form ['description of argument'] (as a string argument example). Just remove the brackets and replace with your own arguments and filenames and you should be set.
 
 ---
 
