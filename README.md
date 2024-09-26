@@ -1,12 +1,10 @@
 ---
 
 ## Multispectral Sex Selection Walkthrough
+A walkthrough of the multispectral data processing and sexual selection proxy metrics analysis code and analysis that I conducted for the paper analyzing morphological proxies of sexual selection that show Darwinian male-biased evolution of sexual dimorphism in day- vs night -flying lepidoptera. The pipeline and analysis is written as a series of python or R scripts, submitted as individual scripts in a SLURM HPC environment via sbatch. Plotting scripts are run locally in Rstudio.
 
-A detailed walkthrough for the multispectral data processing and sexual selection proxy metric analysis conducted for the study on morphological proxies of sexual selection in day- vs night-flying lepidoptera. The analysis pipeline comprises Python and R scripts executed in a SLURM HPC environment.
-
-![Graphical outline of analysis](New_graphical_summary_figure_1_alternartive.png)  
+![Graphical outline of analysis](New_graphical_summary_figure_1_alternartive.png)
 **Figure 1: Graphical outline of the entire analysis pipeline.**
-
 ---
 
 ### Introduction
