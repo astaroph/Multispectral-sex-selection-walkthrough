@@ -115,7 +115,12 @@ There are three components to this approach:
 - **The overall analaysis across all PCs** To determine the overall cumulative evidence for sexual selection in whole groups across all possible traits (Paper main figures and results)
 - **The single-wavelength band morphospace analysis** to determine whether evidence for sexual selection varies as a function of wavelength band class (Paper main figures and results)
 - **The individual PC level analysis** To repeat the analysis within each PC, which are uncorrelated from each other by definition and can be used for statistical analyses that seek to examine correlations between levels of dimorphism and sexual bias or the average rate of evolution without the confounding factors of individual traits being correlated with each other by nature. (Paper supporting figures)
-- 
+
+![Conceptual flowchart of main analysis and calculations](Conceptual_flowchart_Figure_PC_analysis_no_insets_Feb2024_v5.png)
+
+**Figure 3: Main overall dimorphism and sexual bias calculations explained.** A) A graphical explanation of the expected morphological changes proposed by the theories of Alfred Russel Wallace (right, female-biased) and Charles Darwin (left, male-biased). B) Flowchart of analysis pipeline and dataset transformations. C) Equations used in B to calculate sexual selection proxy metrics in the main overall PC analysis. See paper methods for more details [LINK_once_published]. 
+
+
 #### Running the overall dimorphism and sexual bias analysis
 - **Code**: Bootpackage_WW_allPCs_PC_analysis_overall_highboot_bootstrap_ARRAY_commandline_arguments_1m1f_GENERALIZED.sh, Boot_package_Moths_AND_butterflies_PCmetrics_M_minus_F_contrasts_rates_1m1f_datatable_commandline_allPCs_GENERALIZED.r
 - **Submission code**: sbatch /n/home06/astaroph/WingsAndWavelengths/scripts/Bootpackage_WW_allPCs_PC_analysis_overall_highboot_bootstrap_ARRAY_commandline_arguments_1m1f_GENERALIZED.sh ['TAXON'] \
@@ -136,3 +141,13 @@ The output from this analysis are the mean and 95% BCa confidence intervals used
 
 Figure 4: Main overall dimorphism and sexual bias results. A-C show dimorphism and level of male bias in the absolute rate of evolution (B) and interspecific morphological disparity (C). D-F show the same but for single-wavelength band morphospaces.
 
+#### Running the individual PC level dimorphism and sexual bias analysis
+- **Code**: Bootpackage_WW_PC_analysis_IndPCmetrics_allPCs_bootstrap_ARRAY_commandline_arguments_1m1f_GENERALIZED.sh, Boot_package_Moths_AND_butterflies_individualPCs_M_minus_F_contrasts_rates_MD_script_1m1f_datatable_allPCs_avgrates_ISdistnull_GENERALIZED.r
+- **Submission code**: sbatch --array=1-[num_PCs] /path/to/Bootpackage_WW_PC_analysis_IndPCmetrics_allPCs_bootstrap_ARRAY_commandline_arguments_1m1f_GENERALIZED.sh ['TAXON'] \
+['categorical grouping variable from above'] [int, number of desired bootstraps] ['Rdata_containing_pre_calculated_rate_of_evolution_data.RData'] [int,male female specimen threshold] [int, number of cores to use PER ARRAY JOB bootstrapping]
+
+The above code submits a SLURM array job that runs a separate job for each PC axis (column in the PC dataset), for which the dimorphism and sexual bias proxy metrics are calculated separately for each PC. These are analogous to the overall proxy metrics, but modified slightly to account for being summarized at the individual PC level rather than across all PCs. The output from this script is an individual set of variations of these proxy metrics as individual csv files for each PC, which are then grouped together using a companion script (below). The core proxy metrics are  "MF_difference_med" (Male-female dimorphism 'difference'),  "sec_mom_var_med" (AMV or absolute dimorphism in the paper), "Abs_rate_prop_sexbias_med" (Male absolute rate relative to male+female absolute rate), and "Extant_var_MD_prop_sexbias_prop" (Male morphological disparity relative to male+female morphological disparity). Each of these also has a low and high value for a 95% BCa confidence interval range provided (percentile ranges will be used if BCa ranges cannot be computed). For sexual bias calculations a p-value for the significance of male bias will also be provided, computed using the inverted p-value calculation employed in the boot.pval package (https://github.com/mthulin/boot.pval), modified to restrict the minimum possible p-value by the number of bootstrap replicates. Additionally, "Avg_Abs_rate_med" provides the absolute rate, averaged across both males and females, employed in the paper to examine relationships between the overall rate of trait evolution and dimorphism or male bias in sexual selection proxy metrics.
+
+![Individual PC sexual selection proxy metrics used for analysis of linear relationships](Extended data dimorphism vs sexual bias proxy metrics butterflies moths NOGeom sqrt linear models.png)
+
+**Figure 5: Individual PC sexual selection proxy metrics relationships.** Using dimorphism and sexual bias proxy metrics, calculated separately for individual PCs to examine linear relationships between dimorphism and male bias in the absolute rate or morphological disparity across 'traits' (in this case PCs).
