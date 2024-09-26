@@ -67,19 +67,24 @@ These mean, and 95% CI values can then be used for manual plotting and determina
 The above script will take the output from the sensitivity analysis combining script, and generate three different kinds of plots
 
 ![Strip_plot_for_identifying_ideal_sensitivity_thresholds](Sensitivity_striplot_with_threshold_example.png)
+
 1) A Strip_plot_for_identifying_ideal_sensitivity_thresholds
 
 ![The combined mean value and Disparity through time plots, denoting included and excluded metrics](combined_sensitivityplot_with_thresholds_example.png)
+
 2) A combined mean value and Disparity through time plots, denoting included (blue) and excluded (red) metrics
 
 ![Histograms for plotting alongside sensitivity plot](side_barplots_for_combined_figure_with_thresholds_example.png)
+
 3) Histograms for plotting alongside sensitivity plot in the fingal figure.
 
 ### Using sensitivity-filtered trait datasets to produce morphospaces of uncorrelated morphological axes via PCA (singular vector decomposition)
 - **Code**: create_morphospaces_GENERIC.py
 - **Submission code**: sbatch /n/home06/astaroph/WingsAndWavelengths/scripts/create_morphospaces_GENERIC.sh
 The above code comprises a python script to generate overall, top N proportion variance and single-wavelength band PCA morphospaces from the sensitivity filtered raw datasets produced in the last step. Optionally produces a PCA scatter plot.  This removes the inherent correlations between the metrics and allows for subsequent analyses to treat the individual PCA axes as uncorrelated metrics, for the purposes of quantifying dimorphism and male vs female bias in each axis. Note that this script automatically removes any trait column where >90% of the column is 0 values or where the column has a variance of 0, as PCA columns (or the subsets of said dataframe after grouping and filtering) cannot be zero variance, so the number of output PCs will likely be slightly smaller than the number of trait columns supplied.
+
 The submission code is a slurm script with many arguments which need to be changed to the appropriate values needed by the user. Each argument contains help documentation that explains its usage, but in brief:
+
 --dataset_str [sensitivity filtered csv file.csv] \
 --Taxon ['string denoting taxon'] \
 --cat_var ['column name for optional grouping variable present in dataframe, otherwise "All"'] \
@@ -104,8 +109,30 @@ Note that the user supplied 'variable' 'shapevar' and 'open_closed_var' columns 
 Output from this script will be the PCA morphospaces (overall, topN proportion and single wavelength band) (as csv files), and optionally, a PCA plot of desired PC axes grouped by user supplied variables.
 
 ### Bootstrapped sexual selection proxy analyses using PCA morphospaces.
+The following analyses calculate various implementations of three morphological proxy metrics for the strength of sexual selection: sexual dimorphism, and the degree of male bias in the rate of evolution and interspecific morphological disparity.
+These three metrics were chosen based on extensive literature finding that they, individually but especially in tandem, were reliable morphological predictors of heightened sexual selection on traits when direct fitness evidence for sexual selection could be independently verified. In this manuscript, I adapted these to work with highly multi-dimensional trait datasets (through the use of PCA morphospaces where axes shared a common unit space) in a macroevolutionary context, for the first time. I used these to produce overall summaries of the magnitude of sexually dimorphic morphological variance or male bias in the rate of evolution or amount of interspecific morphological disparity which could be compared between different broad groups of species (e.g. 'butterflies' or 'nocturnal moths'), by expressing each proxy metric relative to the overall variance in the morphospace.
+There are three components to this approach:
+- **The overall analaysis across all PCs** To determine the overall cumulative evidence for sexual selection in whole groups across all possible traits (Paper main figures and results)
+- **The single-wavelength band morphospace analysis** to determine whether evidence for sexual selection varies as a function of wavelength band class (Paper main figures and results)
+- **The individual PC level analysis** To repeat the analysis within each PC, which are uncorrelated from each other by definition and can be used for statistical analyses that seek to examine correlations between levels of dimorphism and sexual bias or the average rate of evolution without the confounding factors of individual traits being correlated with each other by nature. (Paper supporting figures)
+- 
+#### Running the overall dimorphism and sexual bias analysis
+- **Code**: Bootpackage_WW_allPCs_PC_analysis_overall_highboot_bootstrap_ARRAY_commandline_arguments_1m1f_GENERALIZED.sh, Boot_package_Moths_AND_butterflies_PCmetrics_M_minus_F_contrasts_rates_1m1f_datatable_commandline_allPCs_GENERALIZED.r
+- **Submission code**: sbatch /n/home06/astaroph/WingsAndWavelengths/scripts/Bootpackage_WW_allPCs_PC_analysis_overall_highboot_bootstrap_ARRAY_commandline_arguments_1m1f_GENERALIZED.sh ['TAXON'] \
+['categorical grouping variable from above'] [int, number of desired bootstraps] ['Rdata_containing_pre_calculated_rate_of_evolution_data.RData'] [int,male female specimen threshold] [int, number of cores to use in bootstrapping] [int, unique number to use for re-running entire analysis with new random seed without overwritting previous results]
+ The above code will run the overall sexual dimorphism, and rate of evolution/morphological disparity sexual bias calculations at the group level, and across all species and PC axes.
+The bootstrapping itself uses pre-generated dataframes of the absolute rate of evolution from the most recent common ancestor of each tip, calculated separately for males and females of each tip using the Rphylopars package and custom scripts. Additionally, raw PCA dataframes are formatted and subsetted to only those species which have the desired numbers of males and females. Both these pre-processed input data frames and the rate of evolution dataframes are contained in user supplied RData files. If the user does not supply an RData frame, then the first part of the code will create these necessary files automatically. However while the subsequent bootstrapping can take advantage of resource intensive multi-cpu threading to speed up bootstrapping calculations, generating these absolute rate dataframes is a time consuming but not parallelizable process, so I recommend running these initial calculations (lines 88-663) separately on reasonably powerful personal computer, and then saving the resulting files as the needed RData frame needed for the rest of the code. This can then be run in a high-performance computing environment (like most of the rest of this pipeline) to better take advantage of parallelization.
+This RData frame is also the same needed for the single PC analysis later on.
+The output from this analysis are the mean and 95% BCa confidence intervals used to make the main paper figures (see below)
 
+#### Running the single wavelength-band dimorphism and sexual bias analysis
+- **Code**: Bootpackage_WW_allPCs_PC_analysis_overall_highboot_bootstrap_ARRAY_commandline_arguments_1m1f_singleband_GENERALIZED.sh, Boot_package_Moths_AND_butterflies_PCmetrics_M_minus_F_contrasts_rates_1m1f_datatable_commandline_allPCs_singleband_GENERALIZED.r
+- **Submission code**: sbatch /PATH/TO/Bootpackage_WW_allPCs_PC_analysis_overall_highboot_bootstrap_ARRAY_commandline_arguments_1m1f_singleband_GENERALIZED.sh ['TAXON'] \
+['categorical grouping variable from above'] [int, number of desired bootstraps] ['Rdata_containing_pre_calculated_rate_of_evolution_data.RData'] [int,male female specimen threshold] [int, number of cores to use in bootstrapping] [int, unique number to use for re-running entire analysis with new random seed without overwritting previous results] ['string denoting the name of the single-wavelength band desired']
 
+ The above code will run the single wavelength band sexual dimorphism, and rate of evolution/morphological disparity sexual bias calculations at the group level, and across all species, but for morphospaces composed only of the single-wavelength-band reflectance based metrics produced above.
 
+![Main figure overall dimorphism and sexual bias results](Main_PC_FINAL_results_allPCs_butterfly_moth_singlebands_figure_v13.png)
 
+Figure 4: Main overall dimorphism and sexual bias results. A-C show dimorphism and level of male bias in the absolute rate of evolution (B) and interspecific morphological disparity (C). D-F show the same but for single-wavelength band morphospaces.
 
