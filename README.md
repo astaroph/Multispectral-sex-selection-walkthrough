@@ -5,6 +5,7 @@ A walkthrough of the multispectral data processing and sexual selection proxy me
 
 ![Graphical outline of analysis](New_graphical_summary_figure_1_alternartive.png)
 **Figure 1: Graphical outline of the entire analysis pipeline.**
+
 ---
 
 ### Introduction
