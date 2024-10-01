@@ -1,6 +1,19 @@
+## Table of Contents  
+[Multispectral 'Color' and Pattern Metrics Calculation](#multispectral)\
+[Compilation of Metrics](#compilation)\
+[Producing a Final trait data frame by joining combined metrics with user supplied metadata](#producing)\
+[Conducting sensitivity analyses to restrict subsequent analyses to only metrics which are not highly sensitive to sampling bias](#conducting)\
+[Using sensitivity-filtered trait datasets to produce morphospaces of uncorrelated morphological axes via PCA (singular vector decomposition)](#using)\
+[Bootstrapped sexual selection proxy analyses using PCA morphospaces.](#bootstrapping)
+
+---
+
 ## Multispectral Sex Selection Walkthrough
 A walkthrough of the multispectral data processing and sexual selection proxy metrics analysis code and analysis that I conducted for the paper analyzing morphological proxies of sexual selection that show Darwinian male-biased evolution of sexual dimorphism in day- vs night -flying lepidoptera. The pipeline and analysis is written as a series of python or R scripts, submitted as individual scripts in a SLURM HPC environment via sbatch. Plotting scripts are run locally in Rstudio.
-![Graphical outline of analysis](New_graphical_summary_figure_1_alternartive.png  =200x)
+
+
+<img src="New_graphical_summary_figure_1_alternartive.png" width="600">
+
 **Figure 1: Graphical outline of the entire analysis pipeline.**
 
 ---
@@ -24,9 +37,11 @@ Additionally, submission code is supplied for all scripts with descriptive place
 
 ---
 
-#### Multispectral 'Color' and Pattern Metrics Calculation
+<a name="multispectral"/>
 
-![Description of augmented multispectral color metrics](Extended_figure_butterfly_moth_supertree_color_palette_with_diagram_v3.png)  
+#### Multispectral 'Color' and Pattern Metrics Calculation
+<img src="Extended_figure_butterfly_moth_supertree_color_palette_with_diagram_v3.png" width="800">
+
 **Figure 2: 'Multispectral color palette' metrics.** A) Visible colors of butterflies and moths, color frequency diagrams show true color swatches with swatch size representing frequency of color on the wing. B) Falsecolor color frequency diagram with each swatch representing UV (blue), 740nm (green) and 940nm (red) reflectance, sized by frequency of appearance on wing. A-B annotated with combined butterfly and moth phylogenies combined for illustration purposes. C) Description of multispectral 'color palette' metrics, derived by concatenating coarsely-binned (0-8, instead of 0-255) reflectance values across wavelength bands.
 
 The following code comprises a python script which uses data from '8-bit' color matrices produced by the multispectral imaging pipeline in Chan, Rabideau Childers and Ashe, _et al._ 2022. These are then read in for each specimen side, with each mat file comprised of a series of multispectral 'color names,' essentially a concatenation of the intensity values of each wavelength band ranging in intensity from 1 (0 reflectance) to 8 (maximum reflectance), which are treated as a kind of 'color species' from which a range of color and pattern metrics are calculated, based on ecological diversity, richness and evenness metrics like Shannon-Weaver entropy or multispectral color contrast. See Extended data figures for more details. Arguments include the bodypart (specified in each pixel of the .mat files), as well as the channel start and stops, which determine over which range of the multispectral wavelength bands (UV, B, G, R, 740nm, 940nm) will these metrics be calculated, as well a taxonomic prefix to differentiate from other taxa being studied.
@@ -41,6 +56,8 @@ sbatch commandlineoptions_generalized_color_metrics_py_generalized.sh '/path/to/
 ```
 
 The above sbatch script will be submitted separately for each desired combaintion of channel ranges, body parts and taxa after which it will be compiled using the following code:
+
+<a name="compilation"/>
 
 #### Compilation of Metrics
 
@@ -67,6 +84,8 @@ iteration_frame.to_csv('color_palette_metrics_compilation_input_variable_datafra
 
 This will then produce a pickle file which is used by the following metadata matching code to produce the final "Trait data frame" used as input to the sensitivity and subsequent analyses.
 
+<a name="producing"/>
+
 #### Producing a Final trait data frame by joining combined metrics with user supplied metadata
 
 - **Code**: compile_master_trait_databases_and_split_by_metadata_FINAL.py, generalized_color_metrics_alltaxa_results_compiler_py_GENERIC.sh 
@@ -85,6 +104,8 @@ The out of this script is a final trait data frame (or frames, if multiple rows 
 These can then be analyzed via the sensitivity analyses to restrict further analyses to metrics which are not prone to bad sampling bias at these taxonomic scales.
 
 ---
+
+<a name="conducting"/>
 
 #### Conducting sensitivity analyses to restrict subsequent analyses to only metrics which are not highly sensitive to sampling bias
 
@@ -107,19 +128,27 @@ Visualize sensitivity thresholds:
  - **Code**: Bootstrapped_sensitivity_analysis_plotting_script_FINAL.R
 The above script will take the output from the sensitivity analysis combining script, and generate three different kinds of plots
 
-![Strip_plot_for_identifying_ideal_sensitivity_thresholds](Sensitivity_striplot_with_threshold_example.png)
+
+<img src="Sensitivity_striplot_with_threshold_example.png" width="400">
+
 
 1) A Strip_plot_for_identifying_ideal_sensitivity_thresholds
 
-![The combined mean value and Disparity through time plots, denoting included and excluded metrics](combined_sensitivityplot_with_thresholds_example.png)
+
+<img src="combined_sensitivityplot_with_thresholds_example.png" width="300">
+
 
 2) A combined mean value and Disparity through time plots, denoting included (blue) and excluded (red) metrics
 
-![Histograms for plotting alongside sensitivity plot](side_barplots_for_combined_figure_with_thresholds_example.png)
+
+<img src="side_barplots_for_combined_figure_with_thresholds_example.png" width="300">
+
 
 3) Histograms for plotting alongside sensitivity plot in the fingal figure.
 
 ---
+
+<a name="using"/>
 
 #### Using sensitivity-filtered trait datasets to produce morphospaces of uncorrelated morphological axes via PCA (singular vector decomposition)
 
@@ -161,6 +190,8 @@ Output from this script will be the PCA morphospaces (overall, topN proportion a
 
 ---
 
+<a name="bootstrapping"/>
+
 #### Bootstrapped sexual selection proxy analyses using PCA morphospaces.
 The following analyses calculate various implementations of three morphological proxy metrics for the strength of sexual selection: sexual dimorphism, and the degree of male bias in the rate of evolution and interspecific morphological disparity.
 These three metrics were chosen based on extensive literature finding that they, individually but especially in tandem, were reliable morphological predictors of heightened sexual selection on traits when direct fitness evidence for sexual selection could be independently verified. In this manuscript, I adapted these to work with highly multi-dimensional trait datasets (through the use of PCA morphospaces where axes shared a common unit space) in a macroevolutionary context, for the first time. I used these to produce overall summaries of the magnitude of sexually dimorphic morphological variance or male bias in the rate of evolution or amount of interspecific morphological disparity which could be compared between different broad groups of species (e.g. 'butterflies' or 'nocturnal moths'), by expressing each proxy metric relative to the overall variance in the morphospace.
@@ -170,7 +201,7 @@ There are three components to this approach:
 - **The single-wavelength band morphospace analysis** to determine whether evidence for sexual selection varies as a function of wavelength band class (Paper main figures and results)
 - **The individual PC level analysis** To repeat the analysis within each PC, which are uncorrelated from each other by definition and can be used for statistical analyses that seek to examine correlations between levels of dimorphism and sexual bias or the average rate of evolution without the confounding factors of individual traits being correlated with each other by nature. (Paper supporting figures)
 
-![Conceptual flowchart of main analysis and calculations](Conceptual_flowchart_Figure_PC_analysis_no_insets_Feb2024_v5.png)
+<img src="Conceptual_flowchart_Figure_PC_analysis_no_insets_Feb2024_v5.png" width="600">
 
 **Figure 3: Main overall dimorphism and sexual bias calculations explained.** A) A graphical explanation of the expected morphological changes proposed by the theories of Alfred Russel Wallace (right, female-biased) and Charles Darwin (left, male-biased). B) Flowchart of analysis pipeline and dataset transformations. C) Equations used in B to calculate sexual selection proxy metrics in the main overall PC analysis. See paper methods for more details [LINK_once_published]. 
 
@@ -199,9 +230,9 @@ sbatch /PATH/TO/Bootpackage_WW_allPCs_PC_analysis_overall_highboot_bootstrap_ARR
 
  The above code will run the single wavelength band sexual dimorphism, and rate of evolution/morphological disparity sexual bias calculations at the group level, and across all species, but for morphospaces composed only of the single-wavelength-band reflectance based metrics produced above.
 
-![Main figure overall dimorphism and sexual bias results](Main_PC_FINAL_results_allPCs_butterfly_moth_singlebands_figure_v13.png)
+<img src="Main_PC_FINAL_results_allPCs_butterfly_moth_singlebands_figure_v13.png" width="700">
 
-Figure 4: Main overall dimorphism and sexual bias results. A-C show dimorphism and level of male bias in the absolute rate of evolution (B) and interspecific morphological disparity (C). D-F show the same but for single-wavelength band morphospaces.
+**Figure 4: Main overall dimorphism and sexual bias results.** A-C show dimorphism and level of male bias in the absolute rate of evolution (B) and interspecific morphological disparity (C). D-F show the same but for single-wavelength band morphospaces.
 
 #### Running the individual PC level dimorphism and sexual bias analysis
 - **Code**: Bootpackage_WW_PC_analysis_IndPCmetrics_allPCs_bootstrap_ARRAY_commandline_arguments_1m1f_GENERALIZED.sh, Boot_package_Moths_AND_butterflies_individualPCs_M_minus_F_contrasts_rates_MD_script_1m1f_datatable_allPCs_avgrates_ISdistnull_GENERALIZED.r
@@ -213,6 +244,20 @@ sbatch --array=1-[num_PCs] /path/to/Bootpackage_WW_PC_analysis_IndPCmetrics_allP
 
 The above code submits a SLURM array job that runs a separate job for each PC axis (column in the PC dataset), for which the dimorphism and sexual bias proxy metrics are calculated separately for each PC. These are analogous to the overall proxy metrics, but modified slightly to account for being summarized at the individual PC level rather than across all PCs. The output from this script is an individual set of variations of these proxy metrics as individual csv files for each PC, which are then grouped together using a companion script (below). The core proxy metrics are  "MF_difference_med" (Male-female dimorphism 'difference'),  "sec_mom_var_med" (AMV or absolute dimorphism in the paper), "Abs_rate_prop_sexbias_med" (Male absolute rate relative to male+female absolute rate), and "Extant_var_MD_prop_sexbias_prop" (Male morphological disparity relative to male+female morphological disparity). Each of these also has a low and high value for a 95% BCa confidence interval range provided (percentile ranges will be used if BCa ranges cannot be computed). For sexual bias calculations a p-value for the significance of male bias will also be provided, computed using the inverted p-value calculation employed in the boot.pval package (https://github.com/mthulin/boot.pval), modified to restrict the minimum possible p-value by the number of bootstrap replicates. Additionally, "Avg_Abs_rate_med" provides the absolute rate, averaged across both males and females, employed in the paper to examine relationships between the overall rate of trait evolution and dimorphism or male bias in sexual selection proxy metrics.
 
-![Individual PC sexual selection proxy metrics used for analysis of linear relationships](Extended_data_dimorphism_vs_sexual_bias_proxy_metrics_butterflies_moths_NOGeom_sqrt_linear_models.png)
+
+<img src="Extended_data_dimorphism_vs_sexual_bias_proxy_metrics_butterflies_moths_NOGeom_sqrt_linear_models.png" width="700">
 
 **Figure 5: Individual PC sexual selection proxy metrics relationships.** Using dimorphism and sexual bias proxy metrics, calculated separately for individual PCs to examine linear relationships between dimorphism and male bias in the absolute rate or morphological disparity across 'traits' (in this case PCs).
+
+
+#### Running the individual raw trait dimorphism and sexual bias analysis
+- **Code**: Bootpackage_WW_PC_analysis_RAWmetrics_bootstrap_ARRAY_commandline_arguments_1m1f_GENERALIZED.sh, Boot_package_redo_Moths_AND_butterflies_RAW_metrics_M_minus_F_contrasts_rates_MD_script_1m1f_datatable_cleanversion_sexISdistnull_GENERALIZED.r
+
+```bash
+sbatch --array=1-[num_PCs] /path/to/Bootpackage_WW_PC_analysis_RAWmetrics_bootstrap_ARRAY_commandline_arguments_1m1f_GENERALIZED.sh ['TAXON'] \
+['categorical grouping variable from above'] [int, number of desired bootstraps] ['Rdata_containing_pre_calculated_rate_of_evolution_data.RData'] [int,male female specimen threshold] [int, number of cores to use PER ARRAY JOB bootstrapping]
+```
+
+<img src="Raw_metrics_segmentplot_figure_workon_v6.png" width="800">
+
+**Figure 6:Dimorphism and sexual bias in wing pattern traits of butterflies and nocturnal moths** Each column is a different trait metric (N = 204) describing wing multispectral colors/patterns within the category indicated at the top. The color intensity of each cell indicates its significance. Red/blue coloration denotes female or male bias, respectively, and green indicates dimorphism. Pie charts show the percent of significantly dimorphic (green) or significantly male and female biased (blue and red) traits across both wings and sides. 
